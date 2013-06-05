@@ -46,7 +46,7 @@ object Tarifsystem extends Controller {
       "Extra" -> 919.0))
 
   val calls = List(routes.Tarifsystem.gebuehr("strafzettel").url,
-    routes.Tarifsystem.listGebuehr().url,
+    routes.Tarifsystem.listGebuehr().url, 
     routes.Tarifsystem.km("Kompakt").url,
     routes.Tarifsystem.listKm.url,
     routes.Tarifsystem.zeit("proWoche").url,
@@ -65,18 +65,22 @@ object Tarifsystem extends Controller {
 <html>
     <head>
         <link rel='stylesheet' href='${routes.WebJarAssets.at(WebJarAssets.locate("css/bootstrap.min.css"))}' />
+        <title>Tarifsystem</title>
     </head>
     <body>
+    <div class="container">
     	<div class="page-header">
     		<h1>Tarifsystem <small>documentation</small></h1>
     	</div>
-    	<h1>Examples: calls</h1>
+    	<h1>Example calls:</h1>
     	<ul>
     		${callList}
     	</ul>
-     	<h1>API:</h1>
+     	<h1>Rest API:</h1>
         <ul>
     		${patterns.map{case (m, p, c) => s"""<li><span class="text-info">${m}</span>, <span>${p}</span></li>"""}.mkString}
+    	</ul>
+    </div>
     </body>
 </html>
         """).as("text/html")
