@@ -1,0 +1,7 @@
+# Routes
+# This file defines all application routes (Higher priority routes first)
+# ~~~~
+
+# Home page
+GET   /gebuehr/:art   controllers.Tarifsystem.gebuehr(art:String)
+GET   /gebuehr		  controllers.Tarifsystem.list
