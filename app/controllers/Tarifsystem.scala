@@ -44,6 +44,29 @@ object Tarifsystem extends Controller {
       "Komfort" -> 765.0,
       "Extra" -> 919.0))
 
+  val calls = List(routes.Tarifsystem.gebuehr("strafzettel").url,
+    routes.Tarifsystem.listGebuehr().url,
+    routes.Tarifsystem.km("Kompakt").url,
+    routes.Tarifsystem.listKm.url,
+    routes.Tarifsystem.zeit("proWoche").url,
+    routes.Tarifsystem.listZeit.url,
+    routes.Tarifsystem.berechneTarif("2014-01-01", "2014-01-02", "2014-01-01", "2014-01-04", 100, "Kleinwagen", "m").url)
+
+  def index = Action {
+    val callList = (calls map (url => s"""<li> <a href="${url}">${url}</a>""")).mkString
+    Ok(s"""
+        <html>
+    		<body>
+<h1>Possible calls</h1>
+<ul>
+        ${callList}
+</ul>
+</body>
+</html>
+        """
+).as("text/html")
+  }
+
   def gebuehr(art: String) = Action {
     Async {
       scala.concurrent.future {

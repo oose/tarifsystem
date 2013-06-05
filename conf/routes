@@ -3,6 +3,7 @@
 # ~~~~
 
 # Home page
+GET   /                                                                   controllers.Tarifsystem.index
 GET   /gebuehr/:art                                                       controllers.Tarifsystem.gebuehr(art:String)
 GET   /gebuehr                                                            controllers.Tarifsystem.listGebuehr()
 
