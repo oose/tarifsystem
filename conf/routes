@@ -15,3 +15,5 @@ GET   /zeit/:art                                                          contro
 GET   /zeit                                                               controllers.Tarifsystem.listZeit()
 
 GET   /berechneTarif/:rvon/:rbis/:fvon/:fbis/:km/:kfzKlasse/:geschlecht   controllers.Tarifsystem.berechneTarif(rvon:String, rbis:String, fvon:String, fbis:String, km: Int, kfzKlasse:String, geschlecht:String)
+
+GET   /webjars/*file                                                      controllers.WebJarAssets.at(file)

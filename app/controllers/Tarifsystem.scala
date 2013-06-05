@@ -9,6 +9,7 @@ import org.joda.time.Interval
 import org.joda.time.DateTime
 import play.api.data.Form
 
+
 object Tarifsystem extends Controller {
 
   val gebuehren = Map(("monatsbeitrag" -> 9.90),
@@ -53,34 +54,48 @@ object Tarifsystem extends Controller {
     routes.Tarifsystem.berechneTarif("2014-01-01", "2014-01-02", "2014-01-01", "2014-01-04", 100, "Kleinwagen", "m").url)
 
   def index = Action {
+    val patterns = for {
+      routes <- play.api.Play.current.routes.toList
+      (method, pattern, call) <- routes.documentation if (!pattern.startsWith("/webjars"))
+    } yield {
+      (method, pattern, call)
+    }
     val callList = (calls map (url => s"""<li> <a href="${url}">${url}</a>""")).mkString
     Ok(s"""
-        <html>
-    		<body>
-<h1>Possible calls</h1>
-<ul>
-        ${callList}
-</ul>
-</body>
+<html>
+    <head>
+        <link rel='stylesheet' href='${routes.WebJarAssets.at(WebJarAssets.locate("css/bootstrap.min.css"))}' />
+    </head>
+    <body>
+    	<div class="page-header">
+    		<h1>Tarifsystem <small>documentation</small></h1>
+    	</div>
+    	<h1>Examples: calls</h1>
+    	<ul>
+    		${callList}
+    	</ul>
+     	<h1>API:</h1>
+        <ul>
+    		${patterns.map{case (m, p, c) => s"""<li><span class="text-info">${m}</span>, <span>${p}</span></li>"""}.mkString}
+    </body>
 </html>
-        """
-).as("text/html")
+        """).as("text/html")
   }
 
   def gebuehr(art: String) = Action {
     Async {
       scala.concurrent.future {
         gebuehren.get(art) match {
-          case Some(betrag) => Ok(Json.parse(s"""
+          case Some(betrag) =>
+            Ok(Json.parse(s"""
 	        {
-	    		"${art}": ${betrag}
-	    		}
+	    	   "${art}": ${betrag}
+	    	}
 	        """))
           case None => BadRequest(Json.toJson(Map("error" -> "Gebuehrenart unbekannt")))
         }
       }
     }
-
   }
 
   def listGebuehr() = Action {
