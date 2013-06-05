@@ -4,4 +4,11 @@
 
 # Home page
 GET   /gebuehr/:art   controllers.Tarifsystem.gebuehr(art:String)
-GET   /gebuehr		  controllers.Tarifsystem.list
+GET   /gebuehr		  controllers.Tarifsystem.listGebuehr()
+
+
+GET   /km/:art   controllers.Tarifsystem.km(art:String)
+GET   /km		  controllers.Tarifsystem.listKm()
+
+GET   /zeit/:art   controllers.Tarifsystem.zeit(art:String)
+GET   /zeit		  controllers.Tarifsystem.listZeit()
