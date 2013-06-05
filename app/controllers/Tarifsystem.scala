@@ -5,6 +5,9 @@ import play.api.mvc._
 import play.api.libs.json.Json._
 import play.api.libs.json.Json
 import play.api.libs.concurrent.Execution.Implicits._
+import org.joda.time.Interval
+import org.joda.time.DateTime
+import play.api.data.Form
 
 object Tarifsystem extends Controller {
 
@@ -90,10 +93,49 @@ object Tarifsystem extends Controller {
         }
       }
     }
-
   }
 
   def listZeit() = Action {
     Ok(Json.toJson(zeittarife))
   }
+
+  def berechneTarif(rvon: String, rbis: String, fvon: String, fbis: String, km: Int, kfzKlasse: String, geschlecht: String) = Action {
+    Async {
+      scala.concurrent.future {
+        val resDauer: Duration = (rvon, rbis)
+        val fahrtDauer: Duration = (fvon, fbis)
+        val gesamtDauer = Duration.maxDauer(resDauer, fahrtDauer).toPeriod().getDays() + 1
+
+        (for (
+          zeittarif <- zeittarife.get("proTag");
+          kmPreis <- kmTarife.get(kfzKlasse);
+          preis <- zeittarif.get(kfzKlasse)
+        ) yield { (kmPreis, preis) } match {
+          case (kmPreis, zeitPreis) => {
+            val total = kmPreis * km + zeitPreis * gesamtDauer
+            Ok(Json.parse(s"""
+    		      { "preis": ${total} ,
+                    "gesamtDauer": ${gesamtDauer},
+                    "kmPreis": ${kmPreis},
+                    "zeitPreis": ${zeitPreis},
+                    "gefahreneKm": ${km} }
+    		      """))
+          }
+        }).getOrElse(BadRequest)
+
+      }
+    }
+  }
+}
+
+case class Duration(from: DateTime, until: DateTime) {
+  assert(isValid)
+  def isValid = (from isBefore until) || (from isEqual until)
+}
+
+object Duration {
+  implicit def getInterval(duration: Duration): Interval = new Interval(duration.from, duration.until)
+  implicit def toDurationFromString(d: (String, String)): Duration = Duration(DateTime.parse(d._1), DateTime.parse(d._2))
+  def maxDauer(z1: Duration, z2: Duration) = Duration(if (z1.from.isBefore(z2.from)) z1.from else z2.from, if (z1.until.isAfter(z2.until)) z1.until else z2.until)
+
 }

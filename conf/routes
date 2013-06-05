@@ -3,12 +3,14 @@
 # ~~~~
 
 # Home page
-GET   /gebuehr/:art   controllers.Tarifsystem.gebuehr(art:String)
-GET   /gebuehr		  controllers.Tarifsystem.listGebuehr()
+GET   /gebuehr/:art                                                       controllers.Tarifsystem.gebuehr(art:String)
+GET   /gebuehr                                                            controllers.Tarifsystem.listGebuehr()
 
 
-GET   /km/:art   controllers.Tarifsystem.km(art:String)
-GET   /km		  controllers.Tarifsystem.listKm()
+GET   /km/:art                                                            controllers.Tarifsystem.km(art:String)
+GET   /km                                                                 controllers.Tarifsystem.listKm()
 
-GET   /zeit/:art   controllers.Tarifsystem.zeit(art:String)
-GET   /zeit		  controllers.Tarifsystem.listZeit()
+GET   /zeit/:art                                                          controllers.Tarifsystem.zeit(art:String)
+GET   /zeit                                                               controllers.Tarifsystem.listZeit()
+
+GET   /berechneTarif/:rvon/:rbis/:fvon/:fbis/:km/:kfzKlasse/:geschlecht   controllers.Tarifsystem.berechneTarif(rvon:String, rbis:String, fvon:String, fbis:String, km: Int, kfzKlasse:String, geschlecht:String)
