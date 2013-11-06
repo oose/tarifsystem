@@ -9,7 +9,6 @@ import org.joda.time.Interval
 import org.joda.time.DateTime
 import play.api.data.Form
 
-
 object Tarifsystem extends Controller {
 
   val gebuehren = Map(("monatsbeitrag" -> 9.90),
@@ -46,7 +45,7 @@ object Tarifsystem extends Controller {
       "Extra" -> 919.0))
 
   val calls = List(routes.Tarifsystem.gebuehr("strafzettel").url,
-    routes.Tarifsystem.listGebuehr().url, 
+    routes.Tarifsystem.listGebuehr().url,
     routes.Tarifsystem.km("Kompakt").url,
     routes.Tarifsystem.listKm.url,
     routes.Tarifsystem.zeit("proWoche").url,
@@ -78,7 +77,7 @@ object Tarifsystem extends Controller {
     	</ul>
      	<h1>Rest API:</h1>
         <ul>
-    		${patterns.map{case (m, p, c) => s"""<li><span class="text-info">${m}</span>, <span>${p}</span></li>"""}.mkString}
+    		${patterns.map { case (m, p, c) => s"""<li><span class="text-info">${m}</span>, <span>${p}</span></li>""" }.mkString}
     	</ul>
     </div>
     </body>
@@ -87,18 +86,15 @@ object Tarifsystem extends Controller {
   }
 
   def gebuehr(art: String) = Action {
-    Async {
-      scala.concurrent.future {
-        gebuehren.get(art) match {
-          case Some(betrag) =>
-            Ok(Json.parse(s"""
+
+    gebuehren.get(art) match {
+      case Some(betrag) =>
+        Ok(Json.parse(s"""
 	        {
 	    	   "${art}": ${betrag}
 	    	}
 	        """))
-          case None => BadRequest(Json.toJson(Map("error" -> "Gebuehrenart unbekannt")))
-        }
-      }
+      case None => BadRequest(Json.toJson(Map("error" -> "Gebuehrenart unbekannt")))
     }
   }
 
@@ -107,19 +103,14 @@ object Tarifsystem extends Controller {
   }
 
   def km(art: String) = Action {
-    Async {
-      scala.concurrent.future {
-        kmTarife.get(art) match {
-          case Some(betrag) => Ok(Json.parse(s"""
+    kmTarife.get(art) match {
+      case Some(betrag) => Ok(Json.parse(s"""
 	        {
 	    		"${art}": ${betrag}
 	    		}
 	        """))
-          case None => BadRequest(Json.toJson(Map("error" -> "Km-Art unbekannt")))
-        }
-      }
+      case None => BadRequest(Json.toJson(Map("error" -> "Km-Art unbekannt")))
     }
-
   }
 
   def listKm() = Action {
@@ -127,13 +118,9 @@ object Tarifsystem extends Controller {
   }
 
   def zeit(art: String) = Action {
-    Async {
-      scala.concurrent.future {
-        zeittarife.get(art) match {
-          case Some(tarife) => Ok(Json.toJson(tarife))
-          case None => BadRequest(Json.toJson(Map("error" -> "Zeit-Art unbekannt")))
-        }
-      }
+    zeittarife.get(art) match {
+      case Some(tarife) => Ok(Json.toJson(tarife))
+      case None => BadRequest(Json.toJson(Map("error" -> "Zeit-Art unbekannt")))
     }
   }
 
@@ -142,31 +129,26 @@ object Tarifsystem extends Controller {
   }
 
   def berechneTarif(rvon: String, rbis: String, fvon: String, fbis: String, km: Int, kfzKlasse: String, geschlecht: String) = Action {
-    Async {
-      scala.concurrent.future {
-        val resDauer: Duration = (rvon, rbis)
-        val fahrtDauer: Duration = (fvon, fbis)
-        val gesamtDauer = Duration.maxDauer(resDauer, fahrtDauer).toPeriod().getDays() + 1
+    val resDauer: Duration = (rvon, rbis)
+    val fahrtDauer: Duration = (fvon, fbis)
+    val gesamtDauer = Duration.maxDauer(resDauer, fahrtDauer).toPeriod().getDays() + 1
 
-        (for (
-          zeittarif <- zeittarife.get("proTag");
-          kmPreis <- kmTarife.get(kfzKlasse);
-          preis <- zeittarif.get(kfzKlasse)
-        ) yield { (kmPreis, preis) } match {
-          case (kmPreis, zeitPreis) => {
-            val total = kmPreis * km + zeitPreis * gesamtDauer
-            Ok(Json.parse(s"""
+    (for (
+      zeittarif <- zeittarife.get("proTag");
+      kmPreis <- kmTarife.get(kfzKlasse);
+      preis <- zeittarif.get(kfzKlasse)
+    ) yield { (kmPreis, preis) } match {
+      case (kmPreis, zeitPreis) => {
+        val total = kmPreis * km + zeitPreis * gesamtDauer
+        Ok(Json.parse(s"""
     		      { "preis": ${total} ,
                     "gesamtDauer": ${gesamtDauer},
                     "kmPreis": ${kmPreis},
                     "zeitPreis": ${zeitPreis},
                     "gefahreneKm": ${km} }
     		      """))
-          }
-        }).getOrElse(BadRequest)
-
       }
-    }
+    }).getOrElse(BadRequest)
   }
 }
 
